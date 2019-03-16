@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Room: {{roomName}}</title>
+    <meta name="roomName" content="{{roomName}}">
+    <link rel="stylesheet" type="text/css" href="../css/style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Gaegu" rel="stylesheet">
+</head>
+<body>
+    <a href="/" id="back">
+        <img src="../img/back.png" alt="back">
+    </a>
+    <section id="title-sec">
+        <h1>Room: {{roomName}}</h1>
+    </section>
+    <div id="content">
+        <div id="message-holder">
+            <ul id="messages">
+            </ul>
+        </div>
+        <div id="boi">
+            <img id="boi-img" src="../img/lil-bois/good1.png">
+            <div id="roomSentiment">0.00</div>
+        </div>
+    </div>
+    <form method="POST" action="/{{roomName}}/messages" id="messageForm">
+        <input type="text" name="message"   id="messageField">
+        <input type="hidden" name="nickname" id="nicknameField" value="">
+        <input type="submit" value="Send">
+    </form>
+    <script src="../js/chatroom.js"></script>
+</body>

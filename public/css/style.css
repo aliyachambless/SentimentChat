@@ -1,0 +1,144 @@
+body { 
+/* The image used */
+    background-image: url("../img/Background.png");
+
+    background-size: 100% 100vh;
+    
+}
+
+#back {
+    position: absolute;
+    top: 50px;
+    left: 90px;
+}
+
+#back img {
+    width: 70px;
+}
+
+#title-sec {
+    padding: 40px;
+    text-align: center;
+    font-family: 'Gaegu', Arial;
+    font-size: 28px;
+    font-weight: 900;
+}
+
+#content {
+    display: flex;
+    flex-direction: row;
+}
+
+#message-holder{
+    flex: 2;
+    margin-left: 75px;
+    overflow: auto;
+    height: 500px;
+}
+
+#boi {
+    flex: 1;
+    height: 500px;
+    padding-left: 20px;
+}
+
+#boi-img {
+    height: 100%;
+}
+
+#messageForm {
+    position: absolute;
+    margin-left: 125px;
+    bottom: 60px;
+}
+
+#messages li{
+    list-style: none;
+    display: flex;
+}
+
+.message {
+    border: 1px solid black;
+    border-radius: 5px;
+    margin: 10px;
+    padding: 6px;
+    width: fit-content;
+}
+
+.sentiment {
+    font-family: 'Gaegu', Arial;
+    font-size: 18px;
+    color: green;
+    position: relative;
+    transform: translate(0%, 20%);
+}
+
+#chatRooms {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 40px;
+}
+
+.roomName {
+    position: relative;
+    top: -50%;
+    left: 75%;
+    transform: translate(-50%, -50%);
+    font-family: 'Gaegu', Arial;
+    font-size: 18px;
+}
+
+.chatOption {
+    display: flex;
+    flex-direction: column;
+    margin: 10px;
+}
+
+a {
+    text-decoration: none;
+    color: black;
+}
+
+#newChat {
+    position: relative;
+    left: 50%;
+    transform: translate(-50%, 0%);
+}
+
+.info {
+    display: flex;
+    flex-direction: row;
+}
+
+.info div {
+    margin-right: 10px;
+    margin-top: 10px;
+    font-family: 'Gaegu', Arial;
+    font-size: 16px;
+}
+
+.time {
+    font-size: 14px;
+}
+
+.nickname {
+    font-size: 20px;
+}
+
+.messageBody {
+    font-family: 'Gaegu', Arial;
+    font-size: 24px;
+}
+
+#roomSentiment {
+    width: fit-content;
+    position: relative;
+    top: -50%;
+    left: 155px;
+    transform: translate(-50%, -50%);
+    font-family: 'Gaegu', Arial;
+    font-size: 50px;
+}
+.red {color:red}
+
+.green {color:green}
