@@ -14,6 +14,7 @@ function newChat(){
     $.get(url, function(data, status){
 //        console.log(data);
     });
+    window.location.href = "/" + id;
 }
 
 function generateRoomIdentifier() {

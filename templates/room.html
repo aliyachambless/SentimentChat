@@ -6,28 +6,38 @@
     <link rel="stylesheet" type="text/css" href="../css/style.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Gaegu" rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="../js/chatroom.js"></script>
 </head>
 <body>
     <a href="/" id="back">
         <img src="../img/back.png" alt="back">
     </a>
+    <input id="change" type="image" src="../img/newNickname.png" onclick="newNickname();" />
     <section id="title-sec">
         <h1>Room: {{roomName}}</h1>
     </section>
     <div id="content">
-        <div id="message-holder">
-            <ul id="messages">
+        <div id="members-holder">
+            <h3>Members</h3>
+            <ul id="members">
             </ul>
+        </div>
+        <div id="message-holder">
+            <div id="actual-messages">
+                <h3>Messages</h3>
+                <ul id="messages">
+                </ul>
+            </div>
+            <form method="POST" action="/{{roomName}}/messages" id="messageForm">
+                <input type="text" name="message"   id="messageField">
+                <input type="hidden" name="nickname" id="nicknameField" value="">
+                <input type="submit" value="Send">
+            </form>
         </div>
         <div id="boi">
             <img id="boi-img" src="../img/lil-bois/good1.png">
             <div id="roomSentiment">0.00</div>
         </div>
     </div>
-    <form method="POST" action="/{{roomName}}/messages" id="messageForm">
-        <input type="text" name="message"   id="messageField">
-        <input type="hidden" name="nickname" id="nicknameField" value="">
-        <input type="submit" value="Send">
-    </form>
-    <script src="../js/chatroom.js"></script>
 </body>

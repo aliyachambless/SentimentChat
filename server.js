@@ -1,6 +1,10 @@
+const http = require('http'); // this is new
 const express = require('express');
-// you will probably need to require more dependencies here.
 const app = express();
+const server = http.createServer(app); // this is new
+
+// add socket.io
+const io = require('socket.io').listen(server);
 
 var Sentiment = require('sentiment');
 var sentiment = new Sentiment();
@@ -74,8 +78,14 @@ app.get('/', function(request, response){
 });
 
 app.get('/:roomName', function(request, response){
-  // do any work you need to do, then
-  response.render('room.html', {roomName: request.params.roomName});
+    ChatRoom.findOne({id: request.params.roomName}, function(err, chatRoom) {
+        if(chatRoom != null){
+            response.render('room.html', {roomName: request.params.roomName});
+        } else {
+            response.status(404).type('html');
+            response.send('<h1 style="text-align: center; padding:50px;">This chat room does not exist my dude. Go away.</h1>');
+        }
+    });
 });
 
 app.get('/:roomName/create', function(request, response){
@@ -88,60 +98,96 @@ app.get('/:roomName/create', function(request, response){
     chatRoom.save(function(err, data) {  // data is what was just saved
         if (err) return console.error(err);
     });
-});
-
-app.get('/:roomName/sentiment', function(request, response){
-    ChatRoom.findOne({id: request.params.roomName}, function(err, chatRoom) {
-        if (err) return console.error(err);
-        response.json(chatRoom.sentiment);
-    });
     
 });
 
-app.get('/:roomName/messages', function(request, response){
-    ChatRoom.findOne({id: request.params.roomName}, function(err, chatRoom) {
-        if (err) return console.error(err);
-        response.json(chatRoom.messages);
-    });
-    
+app.get('*', function(request, response){
+    response.status(404).type('html');
+    response.send('<h1>404 Error!</h1><p>This page does not exist.</p>');
 });
 
-app.post('/:roomName/messages', function(request, response){
-    const roomName = request.params.roomName;   // 'ABC123'
-    const nickname = request.body.nickname; // 'Herbert'
-    const message = request.body.message; 
-    const time = moment().calendar();
-    
-    const messageSentiment = sentiment.analyze(message).comparative;
-    
-    const newMessage = new Message({
-        room: roomName,
-        nickname: nickname,
-        body: message,
-        time: time,
-        sentiment: messageSentiment
-    });
-    
-    ChatRoom.findOne({id: roomName}, function(err, chatRoom) {
-        if (err) return console.error(err);
-        chatRoom.messages.push(newMessage);
-        chatRoom.sentiment += messageSentiment;
-        if(chatRoom.sentiment < -5){
-            chatRoom.sentiment = -5;
-        } else if(chatRoom.sentiment > 5) {
-            chatRoom.sentiment = 5;   
-        }
-        chatRoom.save(function(err, data) {  // data is what was just saved
-            if (err) return console.error(err);
-            response.end();
+io.sockets.on('connection', function(socket){
+    var roomID;
+    // clients emit this when they join new rooms
+    socket.on('join', function(roomName, nickname, callback){
+        socket.join(roomName);
+        socket.nickname = nickname; 
+        roomID = roomName;
+
+        ChatRoom.findOne({id: roomName}, function(err, chatRoom) { 
+            callback(chatRoom.messages, chatRoom.sentiment);
         });
+        
+        membershipChanged(roomName);
+    });
+
+    // the client emits this when they want to send a message
+    socket.on('message', function(message){
+
+        const roomName = roomID;
+        const nickname = socket.nickname; // 'Herbert'
+        const time = moment().calendar();
+
+        const messageSentiment = sentiment.analyze(message).comparative;
+
+        const newMessage = new Message({
+            room: roomName,
+            nickname: nickname,
+            body: message,
+            time: time,
+            sentiment: messageSentiment
+        });
+
+        ChatRoom.findOne({id: roomName}, function(err, chatRoom) {
+            if (err) return console.error(err);
+            chatRoom.messages.push(newMessage);
+            chatRoom.sentiment += messageSentiment;
+            if(chatRoom.sentiment < -5){
+                chatRoom.sentiment = -5;
+            } else if(chatRoom.sentiment > 5) {
+                chatRoom.sentiment = 5;   
+            }
+            chatRoom.save(function(err, data) {  // data is what was just saved
+                if (err) return console.error(err);
+            });
+            io.sockets.in(roomName).emit('refreshSentiment', chatRoom.sentiment);
+        });
+
+        // then send the message to users!
+        io.sockets.in(roomName).emit('message', nickname, message, time, messageSentiment);
+    });
+
+    // the client disconnected/closed their browser window
+    socket.on('disconnect', function(){
+        membershipChanged(roomID);
+    });
+
+    // an error occured with sockets
+    socket.on('error', function(){
+        console.error("There was an error, sorry!");
     });
 
 });
 
-var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080
-var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0'
- 
-app.listen(server_port, server_ip_address, function () {
-  console.log( "Listening on " + server_ip_address + ", port " + server_port )
-});
+function membershipChanged(roomName) {
+    // send them out
+    var room = io.sockets.adapter.rooms[roomName];
+    if(room != undefined){
+        var clients = io.sockets.adapter.rooms[roomName].sockets;   
+
+        //to get the number of clients
+        var numClients = (typeof clients !== 'undefined') ? Object.keys(clients).length : 0;
+
+        let members = [];
+
+        for (var id in clients ) {
+            members.push(io.sockets.connected[id].nickname);
+        }
+
+        io.sockets.in(roomName).emit('membershipChanged', members);
+    }
+}
+
+// changed from *app*.listen(8080);
+server.listen(8080);
+
