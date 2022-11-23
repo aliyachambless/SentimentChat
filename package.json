@@ -16,6 +16,6 @@
     "moment": "^2.24.0",
     "mongoose": "^5.4.18",
     "sentiment": "^5.0.1",
-    "socket.io": "^2.2.0"
+    "socket.io": "^2.5.0"
   }
 }
